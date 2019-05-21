@@ -5,7 +5,7 @@ t.order_of_key(*);//求k在树中是第几大
 t.find_by_order(*);//求树中的第k大
 t.lower_bound(*);//求前驱
 t.upper_bound(*);//求后继
-不可有重复元素，可以用一些trick解决
+不可有重复元素，可以用 pair解决，第二维存时间戳
 下标从0开始
 */
 
