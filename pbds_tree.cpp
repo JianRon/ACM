@@ -9,13 +9,9 @@ t.upper_bound(*);//求后继
 下标从0开始
 */
 
-// can't be deleted
-#define _EXT_CODECVT_SPECIALIZATIONS_H 1
-#define _EXT_ENC_FILEBUF_H 1
-#undef __MINGW32__
-
 #include <bits/stdc++.h>
-#include <bits/extc++.h>
+#include <ext/pb_ds/tree_policy.hpp>
+#include <ext/pb_ds/assoc_container.hpp>
 
 using namespace std;
 using namespace __gnu_pbds;
