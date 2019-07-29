@@ -1,6 +1,5 @@
 /*
-Dijkstra - Min(Max)Cost-Maxflow
-negative cost
+Dijkstra 优化最小费
 */
 
 #include<bits/stdc++.h>
