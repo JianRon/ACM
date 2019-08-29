@@ -1,5 +1,6 @@
 /*
 Dijkstra 优化最小费
+ps:记得在建图之前先调用 init 函数
 */
 
 #include<bits/stdc++.h>
