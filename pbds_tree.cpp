@@ -1,7 +1,7 @@
 /*
 t.insert(*);//插入元素
 t.erase(*);//删除元素
-t.order_of_key(*);//求k在树中是第几大
+t.order_of_key(*);//求k在树中是第几大(返回严格小的数量)
 t.find_by_order(*);//求树中的第k大
 t.lower_bound(*);//求前驱
 t.upper_bound(*);//求后继
