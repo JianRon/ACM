@@ -75,7 +75,7 @@ void del(int val,int& v) {
             update(v,-1);
             return;
         }
-        int d = g[v].ch[1] > g[v].ch[0];
+        int d = g[g[v].ch[1]].key > g[g[v].ch[0]].key;
         if(g[v].ch[1] == 0||g[v].ch[0] == 0) v = g[v].ch[0] | g[v].ch[1];
         else rotate(v,d^1),del(val,g[v].ch[d^1]);
     }
