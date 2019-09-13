@@ -16,12 +16,13 @@ t.upper_bound(*);//求后继
 using namespace std;
 using namespace __gnu_pbds;
 typedef long long ll;
-typedef tree<ll,null_type,less<ll>,rb_tree_tag,tree_order_statistics_node_update> Tree;
-typedef tree<ll,null_type,less<ll>,rb_tree_tag,tree_order_statistics_node_update> Tree;
+template<typename T>
+using Tree = tree<T,null_type,less<T>,rb_tree_tag,tree_order_statistics_node_update>;
+
 int main() {
     int q;
     scanf("%d",&q);
-    Tree t;
+    Tree<ll> t;
     int id = 0;
     while(q--) {
         int opt;
