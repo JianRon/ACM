@@ -1,17 +1,27 @@
+/****************************
+gym 102299D (Splay)
+1、通常情况下key就是下标，这时key没必要存在。而这里的key需要自己定义；
+2、val 表示节点自身信息，mxval 表示子树信息；
+3、使用板子时只需要Node类、rotate、splay、split、ask、update、insert、merge函数;
+4、pre、suf函数用来当作参考来实现相应的查询函数;
+5、基本上需要改的只有pushdown、pushup。
+6、0号节点是空节点，不可访问；
+****************************/
 #include<bits/stdc++.h>
-#define son(v,d) node[v].son[d]
-#define sz(v)    node[v].sz
-#define mx(v)    node[v].mx
-#define mi(v)    node[v].mi
-#define val(v,d)   node[v].val[d]
-#define mxval(v,d)   node[v].mxval[d]
-#define key(v)   node[v].key
-#define lazy(v,d)  node[v].lazy[d]
+#define son(v,d)    node[v].son[d]
+#define sz(v)       node[v].sz
+#define mx(v)       node[v].mx
+#define mi(v)       node[v].mi
+#define key(v)      node[v].key
+#define val(v,d)    node[v].val[d]
+#define mxval(v,d)  node[v].mxval[d]
+#define lazy(v,d)   node[v].lazy[d]
 using namespace std;
 
 typedef long long ll;
 const int maxn = 1e5 + 10;
 const ll  pow32 = 1LL << 32;
+
 struct Fractor {
     ll a, b; /// a / b
     Fractor() {}
@@ -81,7 +91,6 @@ void pushdown(int o) {
     for(int d : {0,1}) {
         if(lazy(o,d)) {
             for(int s : {0,1}) {
-//                printf("%d %d -> %d\n",o,s,son(o,s));
                 if(son(o,s)) {
                         val(son(o,s),d) = max(val(son(o,s),d),lazy(o,d));
                         lazy(son(o,s),d) = max(lazy(son(o,s),d),lazy(o,d));
