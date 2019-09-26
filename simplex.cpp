@@ -30,7 +30,7 @@ void debug(mt a,vd b,vd c,vi N,vi B,double v) {
     puts("a >> ");
     for(auto i:B) {
         for(auto j:N) {
-            printf("(%d %d) => %.2f ",i,j,a[i][j]);
+            printf("(%2d %2d) => %.2f ",i,j,a[i][j]);
         }
         puts("");
     }
@@ -43,7 +43,7 @@ void debug(mt a,vd b,vd c,vi N,vi B,double v) {
     puts("\nc : ");
     for(auto u:c) printf("%.2f ",u);
     puts("\nv : ");
-    printf("%.2f",v);
+    printf("%.2f\n\n",v);
 
 }
 
@@ -71,22 +71,26 @@ void get_optimal_solution(mt& a,vd& b,vd& c,vi& B,vi& N,double& v) {
             break;
         }
         else pivot(a,b,c,B,N,v,l,e);
+        puts("get_optimal_solution::");
+        debug(a,b,c,N,B,v);
     }
 }
 
 void initialize_simplex(mt& a,vd& b,vd& c,vi& B,vi& N,double& v) {
     int k = B[0];
     for(auto u : B) if(b[k] > b[u]) k = u;
+//    puts(">>>>");
     if(b[k] >= eps) return;
     N.push_back(0);
     for(auto u : B) a[u][0] = -1;
 //    puts("ok");
     vd newc(c.size(),0);
     newc[0] = -1;
-    pivot(a,b,newc,B,N,v,4,0);
-//    debug(a,b,newc,N,B,v);
+    pivot(a,b,newc,B,N,v,k,0);
+    puts("initialize::");
+    debug(a,b,newc,N,B,v);
     get_optimal_solution(a,b,newc,B,N,v);
-//    debug(a,b,newc,N,B,v);
+    debug(a,b,newc,N,B,v);
     if(abs(v) <= eps) {
         for(auto i : B) if(i == 0) {
             pivot(a,b,newc,B,N,v,i,N[0]);
@@ -100,6 +104,7 @@ void initialize_simplex(mt& a,vd& b,vd& c,vi& B,vi& N,double& v) {
                 for(auto j : N) {
                     c[j] += c[i] * a[i][j];
                 }
+                v += c[i] * b[i];
                 c[i] = 0;
             }
         }
@@ -109,8 +114,9 @@ void initialize_simplex(mt& a,vd& b,vd& c,vi& B,vi& N,double& v) {
 
 vd simplex(mt& a,vd& b,vd& c,vi& B,vi& N,double& v) {
     initialize_simplex(a,b,c,B,N,v);
+    puts("simplex::");
+    debug(a,b,c,N,B,v);
     get_optimal_solution(a,b,c,B,N,v);
-//    debug(a,b,c,B,B,v);
     int n = N.size(),m = B.size();
     vd res(n,0);
     for(int i = 0;i < m;++i)
@@ -126,24 +132,7 @@ void pivot_test() {
     vd c = {3,1,2,0,0,0};
     double v = 0;
     pivot(a,b,c,B,N,v,5,0);
-
-    puts("a >> ");
-    for(auto i:B) {
-        for(auto j:N) {
-            printf("(%d %d) => %.2f ",i + 1,j + 1,a[i][j]);
-        }
-        puts("");
-    }
-    puts("B : ");
-    for(auto u:B) printf("%d ",u);
-    puts("\nN : ");
-    for(auto u:N) printf("%d ",u);
-    puts("\nb : ");
-    for(auto u:b) printf("%.2f ",u);
-    puts("\nc : ");
-    for(auto u:c) printf("%.2f ",u);
-    puts("\nv : ");
-    printf("%.2f",v);
+    debug(a,b,c,N,B,v);
 }
 void test_init() {
     vd c = {0,2,-1,0,0};
@@ -166,7 +155,7 @@ void test_simplex() {
 int n;
 
 int pos(int i,int j) {
-    return i * (n - 1) + j;
+    return (i - 1) * n + j;
 }
 
 const int maxn = 51;
@@ -174,23 +163,38 @@ int arr[maxn][maxn];
 
 int main() {
 //    test_simplex();
-    int n;
     scanf("%d",&n);
-    int sz = 1 + (n << 1) + (n * n);
+    int sz = 1 + (n << 2) + (n * n);
+    mt a(sz,vd(sz));
+    vd b(sz,0),c(sz,0);
+    vi B(n*n),N(n << 2);
     for(int i = 1;i <= n;++i) {
         for(int j = 1;j <= n;++j) {
             scanf("%d",&arr[i][j]);
+            int v = pos(i,j) + (n << 2);
+            b[v] = -arr[i][j];
+            a[v][i * 2 - 1] = a[v][(j+n) * 2 - 1] = -1;
+            a[v][i * 2] = a[v][(j+n) * 2] = 1;
         }
     }
-    mt a(sz,vd(sz));
-    vd b(sz),c(sz);
-    vi B(n*n),N(n << 1);
+    for(int i = 1;i <= n << 1;++i) c[i*2-1] = -1,c[i * 2] = 1;
     iota(N.begin(),N.end(),1);
-    iota(B.begin(),B.end(),1+(n<<1));
+    iota(B.begin(),B.end(),1+(n<<2));
     double ans = 0;
+    debug(a,b,c,N,B,ans);
     simplex(a,b,c,B,N,ans);
 //    printf("%.f\n",ans);
 
     return 0;
 }
+/**
+4
+1 1 1 1
+1 1 1 1
+1 1 1 0
+1 1 1 1
+1
+1
 
+x1 = 1+x2-x3+x4-x5
+*/
