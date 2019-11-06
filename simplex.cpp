@@ -1,36 +1,31 @@
-/**
-simplex method
-max sum_{i=1}^{n} c[i]x[i]
-st. A*x <= b
---------------------------
-1、目标值是最小值时，求负数形式的最大值。
-2、等于约束拆成大于等于和小于等于
-3、大于等于约束，两边乘-1
---------------------------
-标准型
-sum {a_ij * x_j} <= b_i
-
-松弛型
-x_i = b_i - sum {a_ij * x_j} (注意sum 前面是减号)
-
-sz = 约束条件数量 +  变量数量 + 1
-a[i][j] 为松弛型中的 a_{ij}
-b,c 和原形式对应
-N 为所有的{x_i}
-B 为所有的{x_j}
-v 为最优的值
-方案 x[i] = [i belong B] * b[i]
-*/
-
 #include<bits/stdc++.h>
+#define fst first
+#define snd second
 using namespace std;
 
 typedef vector<double> vd;
 typedef vector<vd>     mt;
 typedef vector<int>    vi;
 const double INF = 2e18;
-const int    sz  = 3e3 + 10;
-const double eps = 1e-9;
+const int    sz  = 3e3 + 2;
+const double eps = 1e-6;
+
+void check(double a[][sz],double b[],double c[],vi& B,vi& N,double v) {
+//    return ;
+    for(auto u : B) {
+            printf("%d %f :: ", u, b[u]);
+        for(auto v : N) {
+            printf("%d->%f ",v, a[u][v]);
+        }
+        puts("");
+    }
+    printf("v == %f ",v);
+    for(auto u : N) {
+        printf("%d -> %f ",u,c[u]);
+    }
+    puts("");
+    puts("");
+}
 
 void pivot(double a[][sz],double b[],double c[],vi& B,vi& N,double& v, int l, int e) {
     for(auto it = N.begin();it != N.end();++it) if(*it == e) {
@@ -62,13 +57,17 @@ void get_optimal_solution(double a[][sz],double b[],double c[],vi& B,vi& N,doubl
     int m = B.size(),n = N.size();
     vd delta(n + m + 1,0);
     while(true) {
+//        puts("::");
+//        check(a, b, c, B, N, v);
         int e = -1;
-        for(int u : N) if(c[u] > 0) {
+        for(int u : N) if(c[u] > eps) {
+//            printf("%f %d\n",c[u], u);
             if(e == -1 || c[u] > c[e]) e = u;
         }
         if(e == -1) break;
         double tmp = 0;
         for(int u : B) {
+//            printf(" ?? %f %d\n",a[u][e],e);
             if(a[u][e] > eps) {
                 delta[u] = b[u] / a[u][e];
             }
@@ -77,10 +76,14 @@ void get_optimal_solution(double a[][sz],double b[],double c[],vi& B,vi& N,doubl
         int l = B.front();
         for(int u : B) if(delta[u] < delta[l]) l = u;
         if(delta[l] == INF) {
-            puts("unbounded");
+            puts("Unbounded");
+            exit(0);
             break;
         }
-        else pivot(a,b,c,B,N,v,l,e);
+        else {
+//            printf("%d %d >> %f\n",l,e,a[l][e]);
+            pivot(a,b,c,B,N,v,l,e);
+        }
     }
 }
 
@@ -92,33 +95,46 @@ void initialize_simplex(double a[][sz],double b[],double c[],vi& B,vi& N,double&
     N.push_back(0);
     for(int u : B) a[u][0] = -1;
     newc[0] = -1;
+//    check(a,b,newc,B,N,v);
     pivot(a,b,newc,B,N,v,k,0);
+//    check(a,b,newc,B,N,v);
     get_optimal_solution(a,b,newc,B,N,v);
-    if(v == 0) {
-        for(int u : B) if(u == 0) {
-            pivot(a,b,newc,B,N,v,u,N[0]);
-        }
-        for(auto it = N.begin();it != N.end();++it) if(*it == 0) {
-            swap(*it,N.back());
-            N.pop_back();
-            break;
-        }
-        for(int u : B) {
-            if(c[u] != 0) {
-                for(int j : N) {
-                    c[j] -= c[u] * a[u][j];
-                }
-                v += c[u] * b[u];
-                c[u] = 0;
-            }
-        }
+//    check(a,b,newc,B,N,v);
+
+//    printf("??");
+    int flag = 0;
+    for(auto it = N.begin();it != N.end();++it) if(*it == 0) {
+        swap(*it,N.back());
+        N.pop_back();
+        flag = 1;
+        break;
     }
-    else puts("infeasible");
+    for(auto it = B.begin();it != B.end();++it) if(*it == 0) {
+        swap(*it,B.back());
+        B.pop_back();
+        break;
+    }
+    for(auto u : B) if(c[u] > eps || c[u] < -eps){
+//        printf("%d %f %f\n",u,c[u],b[u]);
+        for(auto x : N) c[x] -= c[u] * a[u][x];
+        v += c[u] * b[u];
+        c[u] = 0;
+        a[u][0] = 0;
+    }
+    if(flag || (b[0] <= eps && b[0] >= -eps)) return;
+    else {
+        puts("Infeasible");
+        exit(0);
+    }
 }
 
 vd simplex(double a[][sz],double b[],double c[],vi& B,vi& N,double& v) {
+    //    check(a, b, c, B, N, v);
     initialize_simplex(a,b,c,B,N,v);
+//    check(a, b, c, B, N, v);
     get_optimal_solution(a,b,c,B,N,v);
+//    check(a, b, c, B, N, v);
+//    printf("%f\n", v);
     int n = N.size(),m = B.size();
     vd res(n+1,0);
     for(int u : B) {
@@ -127,38 +143,99 @@ vd simplex(double a[][sz],double b[],double c[],vi& B,vi& N,double& v) {
     return res;
 }
 
-int n;
+int n, m1, m2;
 
-int pos(int i,int j) {
-    return (i - 1) * n + j;
-}
-
+double a[sz][sz];
+double b[sz],c[sz];
+vector<int> B, N;
+double v;
 const int maxn = 51;
 int arr[maxn][maxn];
 int ans[maxn][maxn];
-double a[sz][sz];
-double b[sz],c[sz];
+int tot;
 
+typedef pair<int, int> pii;
+void add_con(const int& tb,const vector<pii> &ta) {
+    ++tot;
+    b[tot] = tb;
+    for(auto u : ta) {
+        if(u.fst == 0) u.fst = n + 1;
+        a[tot][u.fst] = u.snd;
+    }
+}
+int pos(int i,int j) {
+    return (i - 1) * n + j;
+}
+void test() {
+    tot = 2;
+    B.push_back(3);
+    B.push_back(4);
+    N.push_back(1);
+    N.push_back(2);
+    add_con(2,{pii(1,2), pii(2,-1)});
+    add_con(-4,{pii(1,1), pii(2,-5)});
+    c[1] = 2,c[2] = -1;
+    simplex(a,b,c,B,N,v);
+}
 int main() {
-    scanf("%d",&n);
-    vi B(n*n),N(n << 1);
+//    test();
+//    int T;
+//    scanf("%d",&T);
+//    while(T--) {
+//        scanf("%d%d%d",&n,&m1,&m2);
+//        tot = n + 1;
+//        c[n] = -1;
+//        for(int i = 1;i <= n;++i) {
+//            add_con(1,{pii(i,1), pii(i-1,-1)});
+//            add_con(0,{pii(i,-1), pii(i-1,1)});
+//        }
+//        for(int i = 0;i <= n;++i) {
+//            add_con(i,{pii(i,1)});
+//        }
+//        for(int i = 1;i <= m1;++i) {
+//            int l, r, k;
+//            scanf("%d%d%d",&l,&r,&k);
+//            add_con(-k,{pii(l-1,1),pii(r,-1)});
+//        }
+//        for(int i = 1;i <= m2;++i) {
+//            int l, r, k;
+//            scanf("%d%d%d",&l,&r,&k);
+//            add_con(-k,{pii(r,1),pii(l-1,-1),pii(n,-1),pii(0,1)});
+//        }
+//        N.resize(n + 1);
+//        iota(N.begin(),N.end(),1);
+//        B.resize(tot - (n + 1));
+//        iota(B.begin(),B.end(),n + 2);
+//        simplex(a, b, c, B, N, v);
+//        printf("%f\n",v);
+//    }
+    int n, m, t;
+    scanf("%d%d%d",&n,&m,&t);
     for(int i = 1;i <= n;++i) {
+        int tmp;
+        scanf("%d",&tmp);
+        c[i] = tmp;
+    }
+    tot = n;
+    for(int i = 1;i <= m;++i) {
+        vector<pii> tmp;
+        int b,ac;
         for(int j = 1;j <= n;++j) {
-            scanf("%d",&arr[i][j]);
-            int v = pos(i,j) + (n << 1);
-            b[v] = -arr[i][j];
-            a[v][i] = a[v][j+n] = -1;
+            scanf("%d",&ac);
+            tmp.push_back(pii(j,ac));
         }
+        scanf("%d",&b);
+        add_con(b,tmp);
     }
-    for(int i = 1;i <= n << 1;++i) c[i] = -1;
-    iota(N.begin(),N.end(),1);
-    iota(B.begin(),B.end(),1+(n<<1));
-
-    double ans = 0;
-    vd res = simplex(a,b,c,B,N,ans);
-    printf("%.f\n",-ans * n);
-    for(int i = 1;i <= n;++i) {
-        for(int j = 1;j <= n;++j) printf("%.f%c",res[i]+res[j+n],j == n?'\n':' ');
-    }
+    vector<int> B, N;
+    N.resize(n);
+    iota(N.begin(), N.end(), 1);
+    B.resize(m);
+    iota(B.begin(), B.end(), n+1);
+    vd ans = simplex(a,b,c,B,N,v);
+    printf("%.10f\n",v);
+    if(t)
+    for(int i = 1;i <= n;++i) printf("%.10f%c",ans[i],i == n ?'\n':' ');
     return 0;
 }
+
