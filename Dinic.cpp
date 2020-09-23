@@ -18,8 +18,8 @@ const int maxn = 1e4 + 10;
 const int INF  = 0x3f3f3f3f;
 struct Dinic{
     vector<Edge> g[maxn];
-    int inq[maxn],vis[maxn],ptr[maxn];
-    int d[maxn],a[maxn],h[maxn];
+    int vis[maxn],ptr[maxn];
+    int d[maxn];
     int n,m,s,t;
     void init(int n) {
         this->n = n;
